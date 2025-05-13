@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Layout, Menu, Avatar, Drawer, Button, Breadcrumb } from 'antd';
+import { Outlet, Link, useLocation, useParams } from 'react-router-dom';
+import { Layout, Menu, Avatar, Drawer, Button } from 'antd';
 import { 
   MessageOutlined, 
   BookOutlined, 
@@ -11,35 +11,15 @@ import {
 
 const { Header, Footer, Content } = Layout;
 
-const breadcrumbNameMap = {
-  '/': 'Home',
-  '/forum': 'Forum',
-  '/tools': 'Study Tools',
-  '/profile': 'Profile',
-};
-
 const AppLayout = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
-
-  const pathSnippets = location.pathname.split('/').filter(i => i);
-  const breadcrumbItems = [
-    { key: 'home', title: <Link to="/"><HomeOutlined /> Home</Link> },
-    ...pathSnippets.map((_, index) => {
-      const url = `/${pathSnippets.slice(0, index + 1).join('/')}`;
-      return { 
-        key: url, 
-        title: breadcrumbNameMap[url] 
-          ? <Link to={url}>{breadcrumbNameMap[url]}</Link>
-          : url.replace('/', '')
-      };
-    }),
-  ];
+  const {userId} = useParams();
 
   const navItems = [
-    { key: 'forum', icon: <MessageOutlined />, label: <Link to="/forum" onClick={() => setOpen(false)}>Forum</Link> },
-    { key: 'study-tools', icon: <BookOutlined />, label: <Link to="/tools" onClick={() => setOpen(false)}>Study Tools</Link> },
-    { key: 'profile', icon: <UserOutlined />, label: <Link to="/profile" onClick={() => setOpen(false)}>Profile</Link> },
+    { key: 'forum', icon: <MessageOutlined />, label: <Link to={`/forum/${userId}`} onClick={() => setOpen(false)}>Forum</Link> },
+    { key: 'study-tools', icon: <BookOutlined />, label: <Link to={`/study-tools/${userId}`} onClick={() => setOpen(false)}>Study Tools</Link> },
+    { key: 'profile', icon: <UserOutlined />, label: <Link to={`/profile/${userId}`} onClick={() => setOpen(false)}>Profile</Link> },
   ];
 
   return (
@@ -56,11 +36,11 @@ const AppLayout = () => {
           </div>
 
           {/* Center Section - Desktop Navigation */}
-          <div className="hidden lg:flex flex-1 justify-center">
+          <div className="hidden lg:block flex-1">
             <Menu
               mode="horizontal"
               items={navItems}
-              className="border-0 text-gray-700"
+              className="border-0 text-gray-700 justify-center"
               style={{ lineHeight: '64px', borderBottom: 'none' }}
             />
           </div>
@@ -70,9 +50,10 @@ const AppLayout = () => {
             {/* Mobile Menu Button */}
             <Button
               type="text"
-              icon={<MenuOutlined className="text-lg text-gray-800 hover:text-gray-600" />}
+              style={{ color: 'white' }}
+              icon={<MenuOutlined className="text-2xl" />}
               onClick={() => setOpen(true)}
-              className="lg:hidden bg-transparent"
+              className="flex lg:!hidden bg-transparent hover:bg-blue-600/10 !text-white"
             />
             
             {/* Desktop Profile */}
@@ -80,7 +61,7 @@ const AppLayout = () => {
               size={40} 
               icon={<UserOutlined className="text-gray-700" />} 
               src="https://randomuser.me/api/portraits/men/1.jpg" 
-              className="hidden lg:block cursor-pointer hover:opacity-80 transition-opacity border-2 border-gray-200"
+              className="!hidden lg:!flex cursor-pointer hover:opacity-80 transition-opacity border-2 border-gray-200"
             />
           </div>
         </div>
@@ -102,6 +83,20 @@ const AppLayout = () => {
           }
         }}
       >
+        {/* Mobile Profile Section */}
+        <div className="px-4 py-4 border-b border-gray-200 flex items-center gap-3">
+          <Avatar 
+            size={45} 
+            icon={<UserOutlined className="text-gray-700" />} 
+            src="https://randomuser.me/api/portraits/men/1.jpg" 
+            className="cursor-pointer border-2 border-gray-200"
+          />
+          <div>
+            <div className="font-medium text-gray-800">John Doe</div>
+            <div className="text-sm text-gray-500">Student</div>
+          </div>
+        </div>
+
         <Menu 
           mode="inline" 
           items={navItems} 
@@ -116,11 +111,6 @@ const AppLayout = () => {
 
       {/* Main Content Area */}
       <Content className="flex-grow pt-20 lg:pt-16 container mx-auto px-4 py-6">
-        {/* Mobile Breadcrumb */}
-        <div className="mb-6 lg:hidden">
-          <Breadcrumb items={breadcrumbItems} className="text-sm text-gray-600" />
-        </div>
-        
         {/* Page Content */}
         <Outlet />
       </Content>
