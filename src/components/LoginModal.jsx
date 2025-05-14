@@ -99,18 +99,6 @@ const LoginModal = ({ open, onClose, onSwitchToRegister }) => {
           />
         </Form.Item>
 
-        <div className="text-right mb-4">
-          <button
-            type="button"
-            onClick={() => {
-              // You can implement password reset functionality here
-              message.info('Password reset functionality will be implemented soon');
-            }}
-            className="text-blue-600 hover:text-blue-700 text-sm"
-          >
-            Forgot Password?
-          </button>
-        </div>
 
         <Form.Item>
           <Button

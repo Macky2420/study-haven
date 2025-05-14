@@ -175,16 +175,6 @@ const RegisterModal = ({ open, onClose }) => {
             Create Account
           </Button>
         </Form.Item>
-
-        <div className="text-center text-gray-600 mt-4">
-          Already have an account?{' '}
-          <button
-            onClick={onClose}
-            className="text-blue-600 hover:text-blue-700 font-medium"
-          >
-            Log in here
-          </button>
-        </div>
       </Form>
     </Modal>
   );
