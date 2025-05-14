@@ -1,18 +1,56 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Modal, Form, Input, Button, message } from 'antd';
 import { MailOutlined, LockOutlined } from '@ant-design/icons';
+import { auth } from '../database/firebaseConfig';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 
 const LoginModal = ({ open, onClose, onSwitchToRegister }) => {
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (values) => {
     try {
-      // Add your Firebase login logic here
-      console.log('Login values:', values);
+      setLoading(true);
+      const { email, password } = values;
+
+      // Sign in with Firebase
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
       message.success('Login successful!');
       onClose();
+      
+      // Navigate to home page with user ID
+      navigate(`/forum/${user.uid}`);
     } catch (error) {
-      message.error(`Login failed: ${error.message}`);
+      console.error('Login error:', error);
+      let errorMessage = 'Login failed';
+      
+      switch (error.code) {
+        case 'auth/user-not-found':
+          errorMessage = 'No account found with this email';
+          break;
+        case 'auth/wrong-password':
+          errorMessage = 'Incorrect password';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Invalid email format';
+          break;
+        case 'auth/user-disabled':
+          errorMessage = 'This account has been disabled';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = 'Too many failed attempts. Please try again later';
+          break;
+        default:
+          errorMessage = 'Login failed. Please try again';
+      }
+      
+      message.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,6 +79,7 @@ const LoginModal = ({ open, onClose, onSwitchToRegister }) => {
           <Input
             prefix={<MailOutlined className="text-gray-400" />}
             placeholder="Email"
+            size="large"
             className="hover:border-blue-500 focus:border-blue-500"
           />
         </Form.Item>
@@ -55,13 +94,18 @@ const LoginModal = ({ open, onClose, onSwitchToRegister }) => {
           <Input.Password
             prefix={<LockOutlined className="text-gray-400" />}
             placeholder="Password"
+            size="large"
             className="hover:border-blue-500 focus:border-blue-500"
           />
         </Form.Item>
 
         <div className="text-right mb-4">
           <button
-            onClick={() => console.log('Implement forgot password')}
+            type="button"
+            onClick={() => {
+              // You can implement password reset functionality here
+              message.info('Password reset functionality will be implemented soon');
+            }}
             className="text-blue-600 hover:text-blue-700 text-sm"
           >
             Forgot Password?
@@ -73,6 +117,8 @@ const LoginModal = ({ open, onClose, onSwitchToRegister }) => {
             type="primary"
             htmlType="submit"
             block
+            loading={loading}
+            size="large"
             className="h-10 font-semibold hover:scale-[1.01] transition-transform"
           >
             Sign In
@@ -82,7 +128,9 @@ const LoginModal = ({ open, onClose, onSwitchToRegister }) => {
         <div className="text-center text-gray-600 mt-4">
           Don't have an account?{' '}
           <button
+            type="button"
             onClick={() => {
+              form.resetFields();
               onClose();
               onSwitchToRegister();
             }}
